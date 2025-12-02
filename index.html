@@ -28,6 +28,44 @@
     background: var(--bg);
   }
 
+  /* 背景粒子效果 */
+  .bg-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .particle {
+    position: absolute;
+    background: radial-gradient(circle, rgba(255,107,157,0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(100vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    90% {
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateY(-100px) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+
   /* 第一阶段：散开→回收→定型为心（停住不消失） */
   @keyframes flight{
     0%{
@@ -59,7 +97,7 @@
     transform-origin:0 100%;transform:rotate(-45deg);
   }
   .msg::after{ left:0;transform-origin:100% 100%;transform:rotate(45deg); }
-  .msg.heart-mode{ color:transparent; text-shadow:none; }
+  /*.msg.heart-mode{ color:transparent; text-shadow:none; }*/
   .msg.heart-mode::before,.msg.heart-mode::after{ opacity:1; }
 
   /* 定型后：轻微"呼吸"2秒（随后触发二次爆炸） */
@@ -142,6 +180,9 @@
 </style>
 </head>
 <body>
+  <!-- 背景粒子效果 -->
+  <div class="bg-particles" id="bgParticles"></div>
+  <!-- 主舞台 -->
   <div class="stage" id="stage">
     <div class="center-title" id="title">for you ♥</div>
   </div>
@@ -166,6 +207,7 @@ const stage  = document.getElementById('stage');
 const replay = document.getElementById('replay');
 const title  = document.getElementById('title');
 const musicControl = document.getElementById('musicControl');
+const bgParticles = document.getElementById('bgParticles');
 
 /* 创建音频元素 */
 const bgMusic = new Audio();
@@ -281,8 +323,26 @@ function createMsg(i,total){
   stage.appendChild(el);
 }
 
+/* ==================== 背景粒子效果 ==================== */
+function createParticles() {
+  for (let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    
+    const size = rand(20, 80);
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+    
+    particle.style.left = `${rand(0, 100)}vw`;
+    particle.style.animationDelay = `${rand(0, 15)}s`;
+    particle.style.animationDuration = `${rand(10, 20)}s`;
+    
+    bgParticles.appendChild(particle);
+  }
+}
+
 /* 触发最终爆炸 */
-function finalBurst(){
+/*function finalBurst(){
   stage.querySelectorAll('.msg.locked').forEach(el=>{
     el.classList.remove('pulse');
     // 统一稍许随机延迟，让爆炸有层次
@@ -291,10 +351,12 @@ function finalBurst(){
     // 清理 DOM
     el.addEventListener('animationend',()=> el.remove(), {once:true});
   });
-}
+}*/
 
 /* 播放全流程 */
 function play(){
+  // 创建背景粒子
+  createParticles();
   // 清空
   stage.querySelectorAll('.msg').forEach(n=>n.remove());
   title.style.opacity = 0;
@@ -307,8 +369,8 @@ function play(){
 
   // 等所有粒子都"定型心形"并心跳完，再统一爆炸
   // 估算：最长 flight ≈ 8.6s + 最大延迟 ≈ 0.35 + 额外余量 0.3s，再等心跳 2.2s
-  const TOTAL_TIME_MS = (8.6 + 0.35 + 0.3 + 2.2) * 1000;
-  setTimeout(finalBurst, TOTAL_TIME_MS);
+  const TOTAL_TIME_MS = (24.44 + 8.6 + 2.2 + 3.0) * 1000;
+  /*setTimeout(finalBurst, TOTAL_TIME_MS);*/
 }
 
 play();
